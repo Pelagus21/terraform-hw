@@ -1,0 +1,39 @@
+- name: Install PostgreSQL and dependencies
+  apt:
+    name: ["postgresql", "postgresql-contrib", "python3-psycopg2"]
+    state: present
+    update_cache: yes
+
+- name: Configure postgresql.conf for logical replication
+  lineinfile:
+    path: "/etc/postgresql/{{ postgresql_version }}/main/postgresql.conf"
+    regexp: "^{{ item.param }}"
+    line: "{{ item.param }} = {{ item.value }}"
+  loop:
+    - { param: "wal_level", value: "logical" }
+    - { param: "max_replication_slots", value: "5" }
+    - { param: "max_wal_senders", value: "5" }
+  notify: restart postgresql
+
+- name: Create database for replication
+  become: yes
+  become_user: postgres
+  postgresql_db:
+    name: "{{ replication_db }}"
+    owner: postgres
+
+- name: Create subscription to master
+  become: yes
+  become_user: postgres
+  postgresql_query:
+    db: "{{ replication_db }}"
+    query: >
+      CREATE SUBSCRIPTION replica_sub 
+      CONNECTION 'host={{ hostvars['server1'].ansible_host }} port=5432 dbname={{ replication_db }} user=replicator password={{ replication_password }}'
+      PUBLICATION master_pub;
+  register: create_subscription
+
+- name: restart postgresql
+  service:
+    name: postgresql
+    state: restarted
