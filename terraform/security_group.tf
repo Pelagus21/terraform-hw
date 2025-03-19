@@ -26,8 +26,6 @@ resource "aws_vpc_security_group_ingress_rule" "allow_self_ip_traffic_p5432_35" 
 
 resource "aws_vpc_security_group_egress_rule" "allow_all_outbound_traffic" {
   security_group_id = aws_security_group.terraform_sec_gr.id
-  from_port = 0
-  to_port = 0
   ip_protocol = "-1"
   cidr_ipv4 = "0.0.0.0/0"
 }
