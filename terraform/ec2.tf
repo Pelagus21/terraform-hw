@@ -34,10 +34,10 @@ resource "local_file" "ansible_inventory" {
    filename = "${path.module}/../ansible/inventory.ini"
    content  = <<EOF
  [master_server]
- server1 ansible_host=${aws_instance.terraform_inst1.public_ip} ansible_user=ubuntu ansible_ssh_common_args='-o StrictHostKeyChecking=no' ansible_ssh_private_key_file='C:/Users/user/.ssh/id_ed25519'
+ server1 ansible_host=${aws_instance.terraform_inst1.public_ip} ansible_user=ubuntu ansible_ssh_common_args='-o StrictHostKeyChecking=no' ansible_ssh_private_key_file='~/.ssh/id_ed25519'
 
  [replica_server]
- server2 ansible_host=${aws_instance.terraform_inst2.public_ip} ansible_user=ubuntu ansible_ssh_common_args='-o StrictHostKeyChecking=no' ansible_ssh_private_key_file='C:/Users/user/.ssh/id_ed25519'
+ server2 ansible_host=${aws_instance.terraform_inst2.public_ip} ansible_user=ubuntu ansible_ssh_common_args='-o StrictHostKeyChecking=no' ansible_ssh_private_key_file='~/.ssh/id_ed25519'
  EOF
    depends_on = [aws_instance.terraform_inst1, aws_instance.terraform_inst2]
  }
