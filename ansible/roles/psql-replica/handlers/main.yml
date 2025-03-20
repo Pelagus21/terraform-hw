@@ -1,5 +1,0 @@
-- name: Restart PostgreSQL main service
-  systemd:
-    name: "postgresql@{{ postgresql_version }}-main.service"
-    state: restarted
-  become: yes

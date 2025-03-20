@@ -16,13 +16,11 @@
     - { param: "wal_level", value: "logical" }
     - { param: "max_replication_slots", value: "5" }
     - { param: "max_wal_senders", value: "5" }
-  notify: restart postgresql
 
 - name: Add user mapping to pg_ident.conf
   lineinfile:
     path: /etc/postgresql/16/main/pg_ident.conf
     line: "user1           root                    postgres"
-  notify: restart postgresql
 
 - name: Configure postgres user authentication mode in pg_hba.conf
   lineinfile:
@@ -30,7 +28,12 @@
     regexp: "^local\\s+all\\s+postgres\\s+peer$"
     line: "local   all             postgres                                trust"
     backrefs: yes
-  notify: restart postgresql
+
+- name: restart postgresql service
+  systemd:
+    name: "postgresql@{{ postgresql_version }}-main.service"
+    state: restarted
+  become: yes
 
 - name: Create database for replication
   become: yes
@@ -50,4 +53,5 @@
       CREATE SUBSCRIPTION replica_sub 
       CONNECTION 'host={{ hostvars['server1'].ansible_host }} port=5432 dbname={{ replication_db }} user=replicator password={{ replication_password }}'
       PUBLICATION master_pub;
+    autocommit: true
   register: create_subscription
