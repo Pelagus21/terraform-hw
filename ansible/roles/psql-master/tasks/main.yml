@@ -1,6 +1,9 @@
 - name: Install postgresql
   apt:
-    name: ["postgresql-{{ postgresql_version }}", "postgresql-contrib-{{ postgresql_version }}", "postgresql-client-{{ postgresql_version }}"]
+    name: [ "postgresql-{{ postgresql_version }}",
+            "postgresql-contrib-{{ postgresql_version }}",
+            "postgresql-client-{{ postgresql_version }}",
+            "python3-psycopg2" ]
     state: present
     update_cache: yes
 
@@ -21,10 +24,16 @@
     line: "host replication replicator {{ hostvars['server2'].ansible_host }}/32 md5"
   notify: restart postgresql
 
+- name: Add user mapping to pg_ident.conf
+  lineinfile:
+    path: /etc/postgresql/16/main/pg_ident.conf
+    line: "user1           root                    postgres"
+  notify: restart postgresql
+
 - name: Configure postgres user authentication mode in pg_hba.conf
   lineinfile:
     path: "/etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf"
-    regexp: "^local(\s+)all(\s+)postgres(\s+)peer(\s*)"
+    regexp: "^local\\s+all\\s+postgres\\s+peer$"
     line: "local   all             postgres                                trust"
     backrefs: yes
   notify: restart postgresql
